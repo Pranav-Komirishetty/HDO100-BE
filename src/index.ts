@@ -14,7 +14,7 @@ import  dashboardRoutes from "./routes/dashboard";
 import cors from "cors";
 
 const app = express();
-const PORT = 4000;
+const PORT = process.env.PORT || 4000;
 
 // Middlewares
 app.use(cors());
@@ -256,5 +256,5 @@ app.get("/profile", authenticate, (req, res) => {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server running on ${PORT}`);
 });
