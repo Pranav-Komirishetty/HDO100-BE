@@ -1,32 +1,50 @@
-// @ts-ignore
-import SibApiV3Sdk from 'sib-api-v3-sdk';
-
-const client = SibApiV3Sdk.ApiClient.instance;
-const apiKey = client.authentications["api-key"];
-
-apiKey.apiKey = process.env.BREVO_API_KEY!;
-
-const emailApi = new SibApiV3Sdk.TransactionalEmailsApi();
+import nodemailer from "nodemailer";
 
 export async function sendEmail(
   to: string,
   subject: string,
   text: string
 ) {
+  console.log("📧 Preparing to send email...");
+  console.log("TO:", to);
+  console.log("USER:", process.env.EMAIL_USER);
+
   try {
-    await emailApi.sendTransacEmail({
-      sender: {
-        email: "otpmailinator@gmail.com",
-        name: "HDO100",
+    const transporter = nodemailer.createTransport({
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false, // TLS
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
       },
-      to: [{ email: to }],
-      subject,
-      textContent: text,
+      tls: {
+        rejectUnauthorized: false,
+      },
     });
 
-    console.log("Email sent via Brevo");
-  } catch (error) {
-    console.error("EMAIL ERROR:", error);
+    console.log("🔌 Verifying SMTP connection...");
+
+    await transporter.verify();
+
+    console.log("✅ SMTP connection verified");
+
+    const info = await transporter.sendMail({
+      from: `"HDO100" <${process.env.EMAIL_USER}>`,
+      to,
+      subject,
+      text,
+    });
+
+    console.log("✅ Email sent successfully");
+    console.log("Message ID:", info.messageId);
+  } catch (error: any) {
+    console.error("❌ EMAIL ERROR FULL:", error);
+
+    if (error.code) console.error("Error Code:", error.code);
+    if (error.response) console.error("SMTP Response:", error.response);
+    if (error.command) console.error("SMTP Command:", error.command);
+
     throw error;
   }
 }
