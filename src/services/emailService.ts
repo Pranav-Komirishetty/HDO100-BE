@@ -12,7 +12,7 @@ export async function sendEmail(
 
   try {
     const response = await resend.emails.send({
-      from: "onboarding@resend.dev", // default allowed
+      from: "HDO100 <no-reply@mail.hdo100.online>", // my domain address
       to,
       subject,
       text,
