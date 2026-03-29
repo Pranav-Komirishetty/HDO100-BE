@@ -12,7 +12,7 @@ router.get("/dashboard", authenticate, async (req: Request, res: Response) => {
     // 1️⃣ Get user
     const { data: userData, error: userError } = await supabase
       .from("users")
-      .select("id")
+      .select("id, name, avatar")
       .eq("email", user.email)
       .single();
 
@@ -208,6 +208,8 @@ router.get("/dashboard", authenticate, async (req: Request, res: Response) => {
       tasks?.reduce((sum: number, t: any) => sum + t.points, 0) || 0;
 
     res.json({
+      user: userData.name,
+      avatar: userData.avatar,
       challenge: {
         id: challenge.id,
         name: challenge.name,
@@ -226,6 +228,28 @@ router.get("/dashboard", authenticate, async (req: Request, res: Response) => {
     });
   } catch (err: any) {
     res.status(500).json({ message: err.message });
+  }
+});
+
+//set profile avatar
+router.put("/profile/avatar", authenticate, async (req, res) => {
+  try {
+    const { avatar } = req.body;
+    const email = (req as any).user.email;
+
+    const { error } = await supabase
+      .from("users")
+      .update({ avatar })
+      .eq("email", email);
+
+    if (error) {
+      return res.status(500).json({ message: "Failed to update avatar" });
+    }
+
+    res.json({ message: "Avatar updated successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 

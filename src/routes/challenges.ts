@@ -26,6 +26,18 @@ router.post("/", authenticate, async (req: Request, res: Response) => {
     });
   }
 
+  // 5️⃣ Validate total points = 100
+  const totalPoints = tasks.reduce(
+    (sum: number, task: any) => sum + task.points,
+    0,
+  );
+
+  if (totalPoints > 100) {
+    return res.status(400).json({
+      message: "Total task points must exceed 100",
+    });
+  }
+
   try {
     // Get user timezone
     const { data: userData, error: userError } = await supabase
@@ -116,6 +128,18 @@ router.put("/:id", authenticate, async (req: Request, res: Response) => {
       });
     }
 
+    // 5️⃣ Validate total points = 100
+    const totalPoints = tasks.reduce(
+      (sum: number, task: any) => sum + task.points,
+      0,
+    );
+
+    if (totalPoints > 100) {
+      return res.status(400).json({
+        message: "Total task points must exceed 100",
+      });
+    }
+
     const titles = new Set<string>();
 
     for (const task of tasks) {
@@ -128,7 +152,7 @@ router.put("/:id", authenticate, async (req: Request, res: Response) => {
       if (
         typeof task.points !== "number" ||
         task.points < 1 ||
-        task.points > 10
+        task.points > 40
       ) {
         return res.status(400).json({
           message: "Task points must be between 1 and 10",
@@ -224,9 +248,9 @@ router.post("/:id/start", authenticate, async (req: Request, res: Response) => {
 
     if (taskError) throw taskError;
 
-    if (!tasks || tasks.length < 10) {
+    if (!tasks || tasks.length < 3) {
       return res.status(400).json({
-        message: "Challenge must have at least 10 tasks to start",
+        message: "Challenge must have at least 3 tasks to start",
       });
     }
 
